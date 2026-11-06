@@ -1,0 +1,528 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>MosquitoWatch | SW08</title>
+
+    <link rel="stylesheet"
+          href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+
+<div class="app-container">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">🦟</div>
+            <div>
+                <h2>MosquitoWatch</h2>
+                <p>SW08 · GVMC</p>
+            </div>
+        </div>
+
+        <div class="nav-heading">MAIN MENU</div>
+
+        <nav class="navigation">
+
+            <button class="nav-item active"
+                    data-page="dashboard">
+                <span>▦</span> Dashboard
+            </button>
+
+            <button class="nav-item"
+                    data-page="map">
+                <span>⌖</span> GIS Map
+            </button>
+
+            <button class="nav-item"
+                    data-page="reports">
+                <span>▤</span> Reports
+            </button>
+
+            <button class="nav-item"
+                    data-page="citizen">
+                <span>＋</span> Citizen Report
+            </button>
+
+            <button class="nav-item"
+                    data-page="survey">
+                <span>☷</span> Larval Survey
+            </button>
+
+        </nav>
+
+        <div class="sidebar-bottom">
+            <div class="system-status">
+                <span class="online-dot"></span>
+                Frontend Demo Mode
+            </div>
+
+            <p>SW08 Mosquito Detection</p>
+            <p>GVMC Public Health</p>
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Topbar -->
+        <header class="topbar">
+
+            <div>
+                <h3 id="page-title">Dashboard</h3>
+                <p class="top-subtitle">
+                    Mosquito breeding spot monitoring
+                </p>
+            </div>
+
+            <div class="top-actions">
+
+                <span class="demo-label">DEMO</span>
+
+                <div class="user-profile">
+                    <div class="avatar">GV</div>
+                    <div>
+                        <strong>GVMC Officer</strong>
+                        <small>Public Health</small>
+                    </div>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- Dashboard Page -->
+        <section id="dashboard" class="page active">
+
+            <div class="welcome-section">
+                <div>
+                    <h1>Welcome to MosquitoWatch</h1>
+                    <p>
+                        Monitor stagnant water locations and
+                        prioritize mosquito control activities.
+                    </p>
+                </div>
+
+                <button class="primary-btn"
+                        onclick="showPage('citizen')">
+                    + New Report
+                </button>
+            </div>
+
+
+            <!-- Statistics -->
+            <div class="stats-grid">
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Total Reports</span>
+                        <span class="stat-icon blue">▤</span>
+                    </div>
+                    <h2 id="total-count">0</h2>
+                    <p>All reported locations</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Pending</span>
+                        <span class="stat-icon orange">◷</span>
+                    </div>
+                    <h2 id="pending-count">0</h2>
+                    <p>Awaiting verification</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Verified</span>
+                        <span class="stat-icon purple">✓</span>
+                    </div>
+                    <h2 id="verified-count">0</h2>
+                    <p>Confirmed locations</p>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-top">
+                        <span>Resolved</span>
+                        <span class="stat-icon green">✔</span>
+                    </div>
+                    <h2 id="resolved-count">0</h2>
+                    <p>Treatment completed</p>
+                </div>
+
+            </div>
+
+
+            <!-- Dashboard Content -->
+            <div class="dashboard-grid">
+
+                <div class="panel map-panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Breeding Spot Map</h3>
+                            <p>Reported stagnant water locations</p>
+                        </div>
+
+                        <button class="text-btn"
+                                onclick="showPage('map')">
+                            View Full Map →
+                        </button>
+                    </div>
+
+                    <div id="dashboard-map"></div>
+
+                </div>
+
+
+                <div class="panel priority-panel">
+
+                    <div class="panel-header">
+                        <div>
+                            <h3>Priority Locations</h3>
+                            <p>Locations requiring attention</p>
+                        </div>
+                    </div>
+
+                    <div id="priority-list"></div>
+
+                </div>
+
+            </div>
+
+
+            <!-- Recent Reports -->
+            <div class="panel recent-panel">
+
+                <div class="panel-header">
+                    <div>
+                        <h3>Recent Reports</h3>
+                        <p>Latest citizen and field reports</p>
+                    </div>
+
+                    <button class="text-btn"
+                            onclick="showPage('reports')">
+                        View All →
+                    </button>
+                </div>
+
+                <div class="table-wrapper">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Location</th>
+                                <th>Ward</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="recent-reports"></tbody>
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- GIS Map Page -->
+        <section id="map" class="page">
+
+            <div class="page-heading">
+                <h1>GIS Monitoring Map</h1>
+                <p>
+                    Explore reported stagnant water locations
+                    across the pilot area.
+                </p>
+            </div>
+
+            <div class="map-legend">
+                <span><i class="legend-dot red"></i> High Priority</span>
+                <span><i class="legend-dot orange"></i> Medium Priority</span>
+                <span><i class="legend-dot green"></i> Low Priority</span>
+            </div>
+
+            <div class="panel full-map-panel">
+                <div id="full-map"></div>
+            </div>
+
+        </section>
+
+
+        <!-- Reports Page -->
+        <section id="reports" class="page">
+
+            <div class="page-heading">
+                <h1>Stagnant Water Reports</h1>
+                <p>Review and manage reported locations.</p>
+            </div>
+
+            <div class="filter-bar">
+
+                <input type="text"
+                       id="search-input"
+                       placeholder="Search report or location...">
+
+                <select id="status-filter">
+                    <option value="All">All Statuses</option>
+                    <option value="Pending">Pending</option>
+                    <option value="Verified">Verified</option>
+                    <option value="Resolved">Resolved</option>
+                </select>
+
+                <button class="primary-btn"
+                        onclick="showPage('citizen')">
+                    + Add Report
+                </button>
+
+            </div>
+
+            <div class="panel">
+
+                <div class="table-wrapper">
+
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Report ID</th>
+                                <th>Location</th>
+                                <th>Ward</th>
+                                <th>Priority</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+
+                        <tbody id="all-reports"></tbody>
+                    </table>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Citizen Report Page -->
+        <section id="citizen" class="page">
+
+            <div class="page-heading">
+                <h1>Report Stagnant Water</h1>
+                <p>
+                    Submit a report to help prevent mosquito breeding.
+                </p>
+            </div>
+
+            <div class="panel form-panel">
+
+                <form id="report-form">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label>Location Name *</label>
+                            <input type="text"
+                                   id="location-name"
+                                   placeholder="e.g. MVP Colony"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Ward Number *</label>
+                            <input type="number"
+                                   id="ward-number"
+                                   placeholder="Enter ward number"
+                                   min="1"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Location Type *</label>
+
+                            <select id="location-type" required>
+                                <option value="">Select type</option>
+                                <option>Construction Site</option>
+                                <option>Open Ground</option>
+                                <option>Drainage</option>
+                                <option>Roadside Water</option>
+                                <option>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Priority</label>
+
+                            <select id="priority">
+                                <option>Medium</option>
+                                <option>High</option>
+                                <option>Low</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Latitude *</label>
+                            <input type="number"
+                                   id="latitude"
+                                   step="any"
+                                   placeholder="Latitude"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Longitude *</label>
+                            <input type="number"
+                                   id="longitude"
+                                   step="any"
+                                   placeholder="Longitude"
+                                   required>
+                        </div>
+
+                    </div>
+
+                    <button type="button"
+                            class="location-btn"
+                            id="gps-btn">
+                        ⌖ Get My Current Location
+                    </button>
+
+
+                    <div class="form-group">
+                        <label>Description</label>
+
+                        <textarea id="description"
+                                  rows="4"
+                                  placeholder="Describe the stagnant water location..."></textarea>
+                    </div>
+
+
+                    <div class="form-group">
+                        <label>Upload Photo *</label>
+
+                        <div class="upload-box">
+
+                            <input type="file"
+                                   id="photo"
+                                   accept="image/*"
+                                   required>
+
+                            <p>📷 Upload stagnant water photo</p>
+                            <small>Choose an image from your device.</small>
+
+                            <img id="photo-preview"
+                                 alt="Photo preview"
+                                 hidden>
+
+                        </div>
+                    </div>
+
+
+                    <button type="submit" class="primary-btn">
+                        Submit Report
+                    </button>
+
+                </form>
+
+                <div id="form-message"></div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Larval Survey Page -->
+        <section id="survey" class="page">
+
+            <div class="page-heading">
+                <h1>Digitized Larval Survey</h1>
+                <p>Record field inspection observations.</p>
+            </div>
+
+            <div class="panel form-panel">
+
+                <form id="survey-form">
+
+                    <div class="form-grid">
+
+                        <div class="form-group">
+                            <label>Ward Number *</label>
+                            <input type="number"
+                                   id="survey-ward"
+                                   min="1"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Survey Location *</label>
+                            <input type="text"
+                                   id="survey-location"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Survey Date *</label>
+                            <input type="date"
+                                   id="survey-date"
+                                   required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Larvae Found? *</label>
+                            <select id="larvae-found" required>
+                                <option value="">Select</option>
+                                <option>Yes</option>
+                                <option>No</option>
+                            </select>
+                        </div>
+
+                    </div>
+
+                    <div class="form-group">
+                        <label>Survey Remarks</label>
+
+                        <textarea id="survey-remarks"
+                                  rows="4"
+                                  placeholder="Enter field observations..."></textarea>
+                    </div>
+
+                    <button type="submit" class="primary-btn">
+                        Save Survey
+                    </button>
+
+                </form>
+
+                <div id="survey-message"></div>
+
+            </div>
+
+        </section>
+
+
+        <footer>
+            SW08 · MosquitoWatch · GVMC Public Health
+        </footer>
+
+    </main>
+
+</div>
+
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+
+</body>
+</html>
